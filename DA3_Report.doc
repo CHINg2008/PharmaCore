@@ -1,0 +1,111 @@
+﻿<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+<head><title>DA3 Report</title></head>
+<body>
+<h1>PharmaCore: Pharmacy Management System</h1>
+<h2>DA3 Assignment Report: Graph Database Integration (Neo4j)</h2>
+<hr>
+<h3>1. Project Explanation</h3>
+<p><b>PharmaCore</b> is a comprehensive, web-based Pharmacy Management System built using the Laravel framework. It is designed to handle the core operations of a modern pharmacy, tracking the entire supply chain lifecycle from pharmaceutical suppliers to retail sales.</p>
+<h4>Key Features:</h4>
+<ul>
+<li><b>Inventory Management:</b> Tracking individual medicine batches, monitoring stock levels, and providing automated alerts for low stock (Out of Stock) and Expired medications.</li>
+<li><b>Supplier & Category Management:</b> Organizing medicines by pharmacological categories and managing relationships with pharmaceutical manufacturers/suppliers.</li>
+<li><b>Point of Sale (POS):</b> Recording daily retail transactions and generating revenue reports.</li>
+<li><b>Advanced Graph Analytics:</b> A dedicated analytics dashboard that maps the complex relationships between suppliers, categories, inventory, and sales using Graph Database principles.</li>
+</ul>
+
+<h3>2. Justification for Choosing Neo4j (Graph Database)</h3>
+<p>While a traditional Relational Database (like SQLite/MySQL) is excellent for strict transactional data (like recording a sale), it struggles with deeply connected data, such as tracking supply chain provenance or finding hidden patterns in sales data.</p>
+<p><b>Neo4j was chosen to extend this project because:</b></p>
+<ol>
+<li><b>Relationship-First Architecture:</b> In a pharmacy, relationships are just as important as the data itself. Knowing <i>which</i> supplier provided a specific batch of medicine that is now expiring is a multi-hop query that is slow in SQL but instantaneous in a Graph database.</li>
+<li><b>Traceability & Provenance:</b> If a batch of medicine is recalled by the FDA, a Graph Database can instantly trace the path from the <code>[Supplier]</code> -> <code>[Product Batch]</code> -> <code>[Sale]</code> -> <code>[Customer]</code> without writing complex <code>JOIN</code> statements.</li>
+<li><b>Analytics Visualization:</b> Neo4j allows us to project the entire pharmacy ecosystem visually. By modeling the data as a graph, administrators can literally <i>see</i> which suppliers are the central hubs of their business.</li>
+</ol>
+
+<h3>3. Graph Schema Design</h3>
+<p>The data is modeled in the graph using the following schema topology:</p>
+<h4>Nodes (Entities)</h4>
+<ul>
+<li><code>(:Category {id, name})</code> - e.g., Analgesics, Antibiotics</li>
+<li><code>(:Supplier {id, name, company, email, phone})</code> - e.g., Pfizer, Johnson & Johnson</li>
+<li><code>(:Product {id, name, price, quantity, expiry_date})</code> - The physical batch of medicine</li>
+<li><code>(:Sale {id, quantity, total_price, date})</code> - The retail transaction</li>
+</ul>
+<h4>Edges (Relationships)</h4>
+<ul>
+<li><code>(:Supplier)-[:SUPPLIES]-&gt;(:Product)</code></li>
+<li><code>(:Product)-[:BELONGS_TO]-&gt;(:Category)</code></li>
+<li><code>(:Sale)-[:SOLD_ITEM]-&gt;(:Product)</code></li>
+</ul>
+
+<h3>4. Graph Operations (Cypher Queries)</h3>
+<p>Here are the core operations demonstrating how the system interacts with the Graph Data Model:</p>
+<p><b>Create Operations (Adding new inventory):</b></p>
+<pre style="background:#f4f4f4; padding:10px;">
+// Add a new product and link it to a supplier and category
+MERGE (s:Supplier {name: 'PharmaInc'})
+MERGE (c:Category {name: 'Antihistamine'})
+CREATE (p:Product {name: 'Cetirizine 10mg', quantity: 100})
+CREATE (s)-[:SUPPLIES]->(p)
+CREATE (p)-[:BELONGS_TO]->(c)
+</pre>
+
+<p><b>Read Operations (Analytics & Reporting):</b></p>
+<pre style="background:#f4f4f4; padding:10px;">
+// Find all products supplied by a specific supplier that are expired
+MATCH (s:Supplier {name: 'PharmaInc'})-[:SUPPLIES]->(p:Product)
+WHERE p.expiry_date &lt; date()
+RETURN p.name, p.quantity
+</pre>
+<pre style="background:#f4f4f4; padding:10px;">
+// Traceability: Find which supplier provided the product for a specific sale
+MATCH (sale:Sale {id: 1042})-[:SOLD_ITEM]->(p:Product)<-[:SUPPLIES]-(s:Supplier)
+RETURN s.name, s.phone
+</pre>
+
+<p><b>Update Operations (Restocking):</b></p>
+<pre style="background:#f4f4f4; padding:10px;">
+MATCH (p:Product {name: 'Cetirizine 10mg'})
+SET p.quantity = p.quantity + 50
+RETURN p
+</pre>
+
+<h3>5. Comparative Analysis: Relational DB vs. Graph DB</h3>
+<table border="1" cellpadding="5" cellspacing="0" style="border-collapse:collapse;">
+<tr>
+<th>Feature</th>
+<th>Relational Database (SQL)</th>
+<th>Graph Database (Neo4j)</th>
+</tr>
+<tr>
+<td><b>Data Structure</b></td>
+<td>Rigid Tables, Rows, and Columns.</td>
+<td>Flexible Nodes and Relationships.</td>
+</tr>
+<tr>
+<td><b>Relationships</b></td>
+<td>Requires Foreign Keys and expensive <code>JOIN</code> operations.</td>
+<td>Relationships are first-class citizens; treated as actual data points.</td>
+</tr>
+<tr>
+<td><b>Query Language</b></td>
+<td>SQL. Can become massive and unreadable for deep relationships.</td>
+<td>Cypher. Designed specifically for pattern matching and drawing paths.</td>
+</tr>
+<tr>
+<td><b>Supply Chain Traceability</b></td>
+<td>Slow. Requires recursive queries or multiple nested joins to trace from Supplier to Sale.</td>
+<td>Instantaneous. Graph traversal natively follows the physical flow of goods.</td>
+</tr>
+<tr>
+<td><b>Best Use Case in PharmaCore</b></td>
+<td>User authentication, exact ledger accounting, and flat reports.</td>
+<td>Network topology, supply chain tracking, and visual analytics.</td>
+</tr>
+</table>
+<br>
+<p><b>Conclusion:</b></p>
+<p>By combining the strengths of a Relational Database for flat transactional data with a Graph Database for relationship analytics, <b>PharmaCore</b> achieves a modern, highly scalable, and analytically powerful architecture.</p>
+</body>
+</html>

@@ -1,0 +1,116 @@
+﻿<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+<head><title>PharmaCore Project Documentation</title></head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6;">
+
+<div style="text-align: center; margin-bottom: 40px;">
+    <h1 style="font-size: 28pt; color: #003366;">PharmaCore</h1>
+    <h2 style="font-size: 18pt; color: #555555;">Comprehensive Pharmacy Management System</h2>
+    <p><b>Project Documentation & Architecture Guide</b></p>
+</div>
+
+<hr>
+
+<h3 style="color: #003366;">1. Project Overview</h3>
+<p><b>PharmaCore</b> is a full-stack, enterprise-grade web application designed to streamline and automate the daily operations of a modern pharmacy. The system effectively manages the entire pharmaceutical supply chain, bridging the gap between medical suppliers, internal inventory management, and front-desk retail point-of-sale (POS) operations. By integrating advanced analytics and real-time inventory alerts, PharmaCore reduces human error, prevents the sale of expired medications, and optimizes stock levels.</p>
+
+<h3 style="color: #003366;">2. Technology Stack</h3>
+<ul>
+    <li><b>Backend Framework:</b> Laravel 8 (PHP)</li>
+    <li><b>Frontend Web:</b> Laravel Blade, Bootstrap 4, jQuery</li>
+    <li><b>Frontend Landing Page:</b> React + Vite (Standalone SPA)</li>
+    <li><b>Primary Database:</b> SQLite (Relational structure for strict transactional integrity)</li>
+    <li><b>Analytics Engine:</b> Simulated Neo4j Graph Database (for Supply Chain topology)</li>
+    <li><b>Data Visualization:</b> Chart.js (Dashboards), Vis.js (Physics-based Graph Analytics)</li>
+    <li><b>Access Control:</b> Spatie Permission (Role-Based Access Control)</li>
+</ul>
+
+<h3 style="color: #003366;">3. Core Modules & Features</h3>
+<table border="1" cellpadding="8" cellspacing="0" style="border-collapse:collapse; width: 100%;">
+    <tr style="background-color: #f2f2f2;">
+        <th>Module</th>
+        <th>Description & Capabilities</th>
+    </tr>
+    <tr>
+        <td><b>Interactive Dashboard</b></td>
+        <td>Provides a bird's-eye view of the pharmacy. Includes real-time calculation of today's sales revenue, total products, active users, and critical alerts for out-of-stock and expired products. Features an interactive resource pie chart and a quick-view table of the latest 5 transactions.</td>
+    </tr>
+    <tr>
+        <td><b>Inventory & Products</b></td>
+        <td>Tracks all individual medicine batches. Automatically categorizes items into active, out-of-stock, and expired segments. Supports tracking of manufacturing dates, expiry dates, purchase costs, retail prices, and discounts.</td>
+    </tr>
+    <tr>
+        <td><b>Purchases (Inbound)</b></td>
+        <td>Manages incoming shipments from suppliers. When a purchase is registered, it automatically updates the corresponding product's stock levels in the main inventory.</td>
+    </tr>
+    <tr>
+        <td><b>Point of Sale (Outbound)</b></td>
+        <td>The front-desk sales register. Allows pharmacists to record transactions. Automatically calculates total costs and deducts sold quantities from the active inventory.</td>
+    </tr>
+    <tr>
+        <td><b>Suppliers & Categories</b></td>
+        <td>Organizes medications by pharmacological classes (e.g., Analgesics, Antibiotics) and maintains a directory of pharmaceutical manufacturers, allowing the pharmacy to track where a specific batch originated.</td>
+    </tr>
+    <tr>
+        <td><b>Graph Analytics</b></td>
+        <td>A visual, physics-based network graph that maps the entire supply chain. It translates relational data into Nodes (Categories, Suppliers, Products, Sales) and Edges (Relationships), allowing administrators to visually trace the provenance of a sold item back to its original supplier.</td>
+    </tr>
+    <tr>
+        <td><b>Reports Generation</b></td>
+        <td>Automated reporting system that defaults to a 30-day retroactive view of both Sales and Purchases. Uses DataTables to allow one-click exporting of reports to PDF, Excel, CSV, or Print.</td>
+    </tr>
+    <tr>
+        <td><b>User Management</b></td>
+        <td>Secure authentication system. Allows the Super-Admin to create new staff accounts, assign specific roles (e.g., Pharmacist, Sales Rep), and strictly control access to sensitive areas of the system.</td>
+    </tr>
+</table>
+
+<h3 style="color: #003366;">4. Database Architecture</h3>
+<p>The system utilizes a dual-concept database approach to maximize both reliability and analytical power.</p>
+<h4>A. Relational Model (Transactional Integrity)</h4>
+<p>The core system relies on a strict relational model to guarantee ACID compliance for financial and medical records:</p>
+<ul>
+    <li><code>Users</code> table links to <code>Roles</code> and <code>Permissions</code>.</li>
+    <li><code>Purchases</code> serve as the origin batch records, linking via Foreign Key to <code>Suppliers</code> and <code>Categories</code>.</li>
+    <li><code>Products</code> are mapped 1:1 to Purchases to represent active sellable stock.</li>
+    <li><code>Sales</code> link via Foreign Key to <code>Products</code> to maintain a strict ledger.</li>
+</ul>
+
+<h4>B. Graph Model (Supply Chain Analytics)</h4>
+<p>To fulfill advanced analytical requirements, the relational data is dynamically projected into a Graph topology:</p>
+<ul>
+    <li><b>Nodes:</b> (Supplier), (Category), (Product), (Sale)</li>
+    <li><b>Edges:</b> [:SUPPLIES], [:BELONGS_TO], [:SOLD_ITEM]</li>
+</ul>
+<p>This allows complex queries like: <i>"Show me all expired products that were supplied by Pfizer last month."</i></p>
+
+<h3 style="color: #003366;">5. Security Implementations</h3>
+<ul>
+    <li><b>Authentication:</b> Robust login system with session management.</li>
+    <li><b>CSRF Protection:</b> All forms (including POS and Inventory updates) are protected by Cross-Site Request Forgery tokens.</li>
+    <li><b>SQL Injection Prevention:</b> All database queries use Laravel's Eloquent ORM and Query Builder with prepared statements.</li>
+    <li><b>Middleware Protection:</b> Routes are heavily guarded by role-based middleware, preventing unauthorized users from accessing the Graph Analytics or Reports sections.</li>
+</ul>
+
+<h3 style="color: #003366;">6. Installation & Deployment Guide</h3>
+<p>To deploy PharmaCore locally, execute the following commands in the terminal:</p>
+<pre style="background:#f4f4f4; padding:10px; border: 1px solid #ddd;">
+# 1. Install PHP dependencies
+composer install
+
+# 2. Setup the environment file and generate app key
+cp .env.example .env
+php artisan key:generate
+
+# 3. Run database migrations and seed the FDA medical data
+php artisan migrate --seed
+
+# 4. Start the Laravel backend server
+php artisan serve
+</pre>
+<p><b>Default Admin Login:</b> <code>admin@admin.com</code> | <b>Password:</b> <code>admin</code></p>
+
+<hr>
+<p style="text-align: center; color: #777;"><i>Document Auto-Generated for PharmaCore System Documentation</i></p>
+
+</body>
+</html>
