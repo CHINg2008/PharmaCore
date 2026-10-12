@@ -6,11 +6,11 @@
         position: relative;
         width: 100%;
         height: 680px;
-        background: #0f172a;
+        background: #f8fafc;
         border-radius: 12px;
-        border: 1px solid #1e293b;
+        border: 1px solid #e2e8f0;
         overflow: hidden;
-        box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
+        box-shadow: 0 4px 16px rgba(0,0,0,0.06);
     }
 
     #mynetwork {
@@ -19,10 +19,11 @@
     }
 
     .graph-toolbar {
-        background: #1e293b;
+        background: #ffffff;
         border-radius: 10px;
         padding: 10px 16px;
-        border: 1px solid #334155;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
     }
 
     .stat-pill {
@@ -44,28 +45,29 @@
     }
 
     .stat-pill.active {
-        box-shadow: 0 0 10px rgba(255,255,255,0.3);
-        border-color: #fff;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+        border-color: #0284c7;
     }
 
-    .pill-all { background: #334155; color: #f8fafc; }
-    .pill-sup { background: rgba(2, 132, 199, 0.2); color: #38bdf8; border-color: #0284c7; }
-    .pill-prod { background: rgba(16, 185, 129, 0.2); color: #34d399; border-color: #10b981; }
-    .pill-cat { background: rgba(147, 51, 234, 0.2); color: #c084fc; border-color: #9333ea; }
-    .pill-sale { background: rgba(236, 72, 153, 0.2); color: #f472b6; border-color: #ec4899; }
-    .pill-expired { background: rgba(239, 68, 68, 0.2); color: #f87171; border-color: #ef4444; }
+    .pill-all { background: #e2e8f0; color: #1e293b; border-color: #cbd5e1; }
+    .pill-sup { background: rgba(2, 132, 199, 0.1); color: #0284c7; border-color: #bae6fd; }
+    .pill-prod { background: rgba(16, 185, 129, 0.1); color: #059669; border-color: #a7f3d0; }
+    .pill-cat { background: rgba(147, 51, 234, 0.1); color: #7e22ce; border-color: #e9d5ff; }
+    .pill-sale { background: rgba(236, 72, 153, 0.1); color: #db2777; border-color: #fbcfe8; }
+    .pill-expired { background: rgba(239, 68, 68, 0.1); color: #dc2626; border-color: #fecaca; }
 
     /* Node Inspector Panel */
     .inspector-panel {
-        background: #1e293b;
-        border: 1px solid #334155;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
         border-radius: 12px;
         padding: 20px;
-        color: #f8fafc;
+        color: #1e293b;
         height: 680px;
         display: flex;
         flex-direction: column;
         overflow-y: auto;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.06);
     }
 
     .inspector-prop-table {
@@ -76,17 +78,17 @@
 
     .inspector-prop-table td {
         padding: 6px 8px;
-        border-bottom: 1px solid rgba(255,255,255,0.06);
+        border-bottom: 1px solid #f1f5f9;
     }
 
     .inspector-prop-table td:first-child {
-        color: #94a3b8;
+        color: #64748b;
         font-weight: 600;
         width: 40%;
     }
 
     .inspector-prop-table td:last-child {
-        color: #f1f5f9;
+        color: #0f172a;
         font-family: monospace;
     }
 
@@ -98,27 +100,27 @@
         margin: 3px;
         border-radius: 6px;
         font-size: 0.78rem;
-        background: #0f172a;
-        border: 1px solid #334155;
-        color: #e2e8f0;
+        background: #f1f5f9;
+        border: 1px solid #cbd5e1;
+        color: #1e293b;
         cursor: pointer;
         transition: all 0.15s;
     }
 
     .neighbor-pill:hover {
-        background: #38bdf8;
-        color: #0f172a;
-        border-color: #38bdf8;
+        background: #0284c7;
+        color: #ffffff;
+        border-color: #0284c7;
     }
 
     .cypher-box {
-        background: #0b1120;
-        border: 1px solid #334155;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
         border-radius: 8px;
         padding: 10px;
         font-family: 'JetBrains Mono', Consolas, monospace;
         font-size: 0.78rem;
-        color: #38bdf8;
+        color: #0369a1;
         line-height: 1.5;
         overflow-x: auto;
         white-space: pre-wrap;
@@ -189,9 +191,9 @@
             <div class="d-flex align-items-center" style="min-width: 280px;">
                 <div class="input-group input-group-sm">
                     <div class="input-group-prepend">
-                        <span class="input-group-text bg-dark border-secondary text-muted"><i class="fe fe-search"></i></span>
+                        <span class="input-group-text bg-white border-right-0 text-muted" style="border-color: #cbd5e1;"><i class="fe fe-search"></i></span>
                     </div>
-                    <input type="text" id="graphSearchInput" class="form-control bg-dark text-white border-secondary" placeholder="Search product, supplier..." onkeyup="searchGraph(this.value)">
+                    <input type="text" id="graphSearchInput" class="form-control bg-white text-dark border-left-0" style="border-color: #cbd5e1;" placeholder="Search product, supplier..." onkeyup="searchGraph(this.value)">
                     <div class="input-group-append">
                         <button class="btn btn-outline-secondary" type="button" onclick="clearSearch()"><i class="fe fe-x"></i></button>
                     </div>
@@ -209,7 +211,7 @@
             <div id="mynetwork"></div>
 
             <!-- In-Canvas Quick Legend Overlay -->
-            <div style="position: absolute; bottom: 15px; left: 15px; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px); padding: 8px 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); font-size: 0.75rem; color: #cbd5e1; z-index: 10; display: flex; gap: 14px; align-items: center;">
+            <div style="position: absolute; bottom: 15px; left: 15px; background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(8px); padding: 8px 14px; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 0.75rem; color: #475569; z-index: 10; display: flex; gap: 14px; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.06);">
                 <span class="d-flex align-items-center"><span style="display:inline-block; width:12px; height:12px; background:#0284c7; border-radius:2px; margin-right:5px;"></span> Supplier</span>
                 <span class="d-flex align-items-center"><span style="display:inline-block; width:12px; height:12px; background:#10b981; border-radius:50%; margin-right:5px;"></span> Product</span>
                 <span class="d-flex align-items-center"><span style="display:inline-block; width:0; height:0; border-left:6px solid transparent; border-right:6px solid transparent; border-bottom:12px solid #9333ea; margin-right:5px;"></span> Category</span>
@@ -218,7 +220,7 @@
             </div>
 
             <!-- Interactive Mode Hint -->
-            <div style="position: absolute; top: 15px; right: 15px; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px); padding: 6px 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); font-size: 0.75rem; color: #94a3b8; z-index: 10;">
+            <div style="position: absolute; top: 15px; right: 15px; background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(8px); padding: 6px 12px; border-radius: 6px; border: 1px solid #e2e8f0; font-size: 0.75rem; color: #64748b; z-index: 10; box-shadow: 0 4px 12px rgba(0,0,0,0.06);">
                 <i class="fe fe-info mr-1 text-primary"></i> <b>Click any node</b> to highlight neighbors & inspect properties
             </div>
         </div>
@@ -229,15 +231,15 @@
         <div class="inspector-panel" id="inspectorPanel">
             <!-- Default Welcome State -->
             <div id="inspectorEmptyState" class="text-center my-auto py-5">
-                <div style="font-size: 3rem; color: #475569; margin-bottom: 15px;">
+                <div style="font-size: 3rem; color: #94a3b8; margin-bottom: 15px;">
                     <i class="fe fe-share-2"></i>
                 </div>
-                <h5 class="text-white font-weight-bold">Interactive Inspector</h5>
+                <h5 class="text-dark font-weight-bold">Interactive Inspector</h5>
                 <p class="text-muted" style="font-size: 0.84rem;">
                     Click any Node in the Neo4j graph network to inspect its graph properties, trace upstream suppliers, and view direct relationships.
                 </p>
-                <div class="p-2 bg-dark rounded border border-secondary text-left mt-3" style="font-size: 0.78rem;">
-                    <div class="text-info font-weight-bold mb-1"><i class="fe fe-check mr-1"></i> Features Available:</div>
+                <div class="p-2 bg-light rounded border text-left mt-3" style="font-size: 0.78rem; border-color: #e2e8f0;">
+                    <div class="text-primary font-weight-bold mb-1"><i class="fe fe-check mr-1"></i> Features Available:</div>
                     <div class="text-muted">• Real-time 1-Hop Neighborhood Highlighting</div>
                     <div class="text-muted">• One-click Supply Chain Provenance Trace</div>
                     <div class="text-muted">• Native openCypher Query Generation</div>
@@ -246,10 +248,10 @@
 
             <!-- Active Selected Node Details -->
             <div id="inspectorActiveState" style="display: none;">
-                <div class="d-flex justify-content-between align-items-start mb-3 pb-2 border-bottom border-secondary">
+                <div class="d-flex justify-content-between align-items-start mb-3 pb-2 border-bottom">
                     <div>
                         <span id="inspectBadge" class="badge badge-pill badge-primary mb-1">Entity</span>
-                        <h5 id="inspectTitle" class="text-white font-weight-bold mb-0">Title</h5>
+                        <h5 id="inspectTitle" class="text-dark font-weight-bold mb-0">Title</h5>
                     </div>
                     <button class="btn btn-sm btn-outline-secondary" onclick="clearSelection()" title="Deselect Node">
                         <i class="fe fe-x"></i>
@@ -294,10 +296,10 @@
 <!-- Modal: Neo4j Cypher Simulator -->
 <div class="modal fade" id="cypherModal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content" style="background: #0f172a; color: #f8fafc; border: 1px solid #334155;">
-            <div class="modal-header border-secondary">
-                <h5 class="modal-title font-weight-bold text-white"><i class="fe fe-terminal text-info mr-2"></i>Neo4j Cypher Query Simulator</h5>
-                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+        <div class="modal-content" style="background: #ffffff; color: #1e293b; border: 1px solid #e2e8f0; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
+            <div class="modal-header border-bottom">
+                <h5 class="modal-title font-weight-bold text-dark"><i class="fe fe-terminal text-primary mr-2"></i>Neo4j Cypher Query Simulator</h5>
+                <button type="button" class="close text-dark" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -307,15 +309,15 @@
                 </p>
 
                 <div class="list-group list-group-flush mb-3">
-                    <div class="list-group-item bg-dark border-secondary p-3 mb-2 rounded" style="cursor: pointer;" onclick="runSimulatedCypher(1)">
+                    <div class="list-group-item bg-light border p-3 mb-2 rounded" style="cursor: pointer; border-color: #e2e8f0 !important;" onclick="runSimulatedCypher(1)">
                         <div class="d-flex justify-content-between align-items-center mb-1">
-                            <strong class="text-info"><i class="fe fe-play mr-1"></i> Query 1: Full Supply Chain Path</strong>
+                            <strong class="text-primary"><i class="fe fe-play mr-1"></i> Query 1: Full Supply Chain Path</strong>
                             <span class="badge badge-primary">Supplier ➔ Product ➔ Category</span>
                         </div>
                         <div class="cypher-box mt-1">MATCH (s:Supplier)-[:SUPPLIES]->(p:Product)-[:BELONGS_TO]->(c:Category) RETURN s, p, c LIMIT 25</div>
                     </div>
 
-                    <div class="list-group-item bg-dark border-secondary p-3 mb-2 rounded" style="cursor: pointer;" onclick="runSimulatedCypher(2)">
+                    <div class="list-group-item bg-light border p-3 mb-2 rounded" style="cursor: pointer; border-color: #e2e8f0 !important;" onclick="runSimulatedCypher(2)">
                         <div class="d-flex justify-content-between align-items-center mb-1">
                             <strong class="text-danger"><i class="fe fe-play mr-1"></i> Query 2: Product Batch Recalls (Expired Medications)</strong>
                             <span class="badge badge-danger">Expired Risk Path</span>
@@ -323,7 +325,7 @@
                         <div class="cypher-box mt-1">MATCH (s:Supplier)-[:SUPPLIES]->(p:Product) WHERE p.is_expired = true RETURN s, p</div>
                     </div>
 
-                    <div class="list-group-item bg-dark border-secondary p-3 mb-2 rounded" style="cursor: pointer;" onclick="runSimulatedCypher(3)">
+                    <div class="list-group-item bg-light border p-3 mb-2 rounded" style="cursor: pointer; border-color: #e2e8f0 !important;" onclick="runSimulatedCypher(3)">
                         <div class="d-flex justify-content-between align-items-center mb-1">
                             <strong class="text-success"><i class="fe fe-play mr-1"></i> Query 3: Sales Provenance (Dispensed Medications)</strong>
                             <span class="badge badge-success">Sale ➔ Product</span>
@@ -331,7 +333,7 @@
                         <div class="cypher-box mt-1">MATCH (sa:Sale)-[:SOLD_PRODUCT]->(p:Product) RETURN sa, p</div>
                     </div>
 
-                    <div class="list-group-item bg-dark border-secondary p-3 mb-2 rounded" style="cursor: pointer;" onclick="runSimulatedCypher(4)">
+                    <div class="list-group-item bg-light border p-3 mb-2 rounded" style="cursor: pointer; border-color: #e2e8f0 !important;" onclick="runSimulatedCypher(4)">
                         <div class="d-flex justify-content-between align-items-center mb-1">
                             <strong class="text-warning"><i class="fe fe-play mr-1"></i> Query 4: Depleted Stock Alert</strong>
                             <span class="badge badge-warning">Stock = 0</span>
@@ -340,7 +342,7 @@
                     </div>
                 </div>
             </div>
-            <div class="modal-footer border-secondary">
+            <div class="modal-footer border-top">
                 <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Close</button>
             </div>
         </div>
@@ -366,55 +368,55 @@
     const container = document.getElementById('mynetwork');
     const data = { nodes: nodesDataSet, edges: edgesDataSet };
 
-    // Group Color & Shape Palettes matching Neo4j Bloom
+    // Group Color & Shape Palettes matching Neo4j Bloom (Light Theme)
     const groupStyles = {
         category: {
-            color: { background: '#9333ea', border: '#7e22ce', highlight: { background: '#a855f7', border: '#ffffff' } },
+            color: { background: '#9333ea', border: '#7e22ce', highlight: { background: '#a855f7', border: '#6b21a8' } },
             shape: 'triangle',
             size: 24,
-            font: { color: '#ffffff', face: 'Arial', size: 13, bold: true }
+            font: { color: '#1e293b', face: 'Arial', size: 13, bold: true }
         },
         supplier: {
-            color: { background: '#0284c7', border: '#0369a1', highlight: { background: '#38bdf8', border: '#ffffff' } },
+            color: { background: '#0284c7', border: '#0369a1', highlight: { background: '#38bdf8', border: '#0284c7' } },
             shape: 'box',
             font: { color: '#ffffff', face: 'Arial', size: 12, bold: true },
             margin: 10
         },
         product: {
-            color: { background: '#10b981', border: '#059669', highlight: { background: '#34d399', border: '#ffffff' } },
+            color: { background: '#10b981', border: '#059669', highlight: { background: '#34d399', border: '#059669' } },
             shape: 'dot',
             size: 20,
-            font: { color: '#f8fafc', face: 'Arial', size: 12 }
+            font: { color: '#1e293b', face: 'Arial', size: 12 }
         },
         product_expired: {
-            color: { background: '#ef4444', border: '#b91c1c', highlight: { background: '#f87171', border: '#ffffff' } },
+            color: { background: '#ef4444', border: '#b91c1c', highlight: { background: '#f87171', border: '#b91c1c' } },
             shape: 'dot',
             size: 22,
-            font: { color: '#fca5a5', face: 'Arial', size: 12, bold: true }
+            font: { color: '#b91c1c', face: 'Arial', size: 12, bold: true }
         },
         product_outstock: {
-            color: { background: '#f59e0b', border: '#b45309', highlight: { background: '#fbbf24', border: '#ffffff' } },
+            color: { background: '#f59e0b', border: '#b45309', highlight: { background: '#fbbf24', border: '#b45309' } },
             shape: 'dot',
             size: 20,
-            font: { color: '#fde68a', face: 'Arial', size: 12 }
+            font: { color: '#b45309', face: 'Arial', size: 12 }
         },
         sale: {
-            color: { background: '#ec4899', border: '#be185d', highlight: { background: '#f472b6', border: '#ffffff' } },
+            color: { background: '#ec4899', border: '#be185d', highlight: { background: '#f472b6', border: '#be185d' } },
             shape: 'star',
             size: 22,
-            font: { color: '#ffffff', face: 'Arial', size: 12, bold: true }
+            font: { color: '#be185d', face: 'Arial', size: 12, bold: true }
         }
     };
 
     const defaultOptions = {
         nodes: {
             borderWidth: 2,
-            shadow: { enabled: true, color: 'rgba(0,0,0,0.4)', size: 8, x: 3, y: 3 }
+            shadow: { enabled: true, color: 'rgba(0,0,0,0.1)', size: 6, x: 2, y: 2 }
         },
         edges: {
             width: 2,
-            color: { color: '#475569', highlight: '#38bdf8', opacity: 0.8 },
-            font: { color: '#94a3b8', size: 11, align: 'middle', background: '#0f172a', strokeWidth: 0 },
+            color: { color: '#94a3b8', highlight: '#0284c7', opacity: 0.8 },
+            font: { color: '#475569', size: 11, align: 'middle', background: '#f8fafc', strokeWidth: 0 },
             arrows: { to: { enabled: true, scaleFactor: 0.6 } },
             smooth: { type: 'continuous' }
         },
@@ -477,10 +479,11 @@
         // Update Opacities
         const updatedNodes = rawNodes.map(n => {
             const isConnected = allConnected.has(n.id);
+            const isBox = n.group === 'supplier';
             return {
                 id: n.id,
-                opacity: isConnected ? 1.0 : 0.15,
-                font: { color: isConnected ? '#ffffff' : 'rgba(255,255,255,0.1)' }
+                opacity: isConnected ? 1.0 : 0.18,
+                font: { color: isConnected ? (isBox ? '#ffffff' : '#1e293b') : 'rgba(30,41,59,0.15)' }
             };
         });
 
@@ -488,7 +491,7 @@
             const isConnected = connectedEdges.has(e.id);
             return {
                 id: e.id,
-                color: isConnected ? { color: '#38bdf8', opacity: 1.0 } : { color: '#334155', opacity: 0.08 }
+                color: isConnected ? { color: '#0284c7', opacity: 1.0 } : { color: '#cbd5e1', opacity: 0.15 }
             };
         });
 
@@ -505,11 +508,11 @@
         const restoredNodes = rawNodes.map(n => ({
             id: n.id,
             opacity: 1.0,
-            font: { color: '#f8fafc' }
+            font: { color: n.group === 'supplier' ? '#ffffff' : '#1e293b' }
         }));
         const restoredEdges = rawEdges.map(e => ({
             id: e.id,
-            color: { color: '#475569', opacity: 0.8 }
+            color: { color: '#94a3b8', opacity: 0.8 }
         }));
 
         nodesDataSet.update(restoredNodes);
