@@ -81,7 +81,7 @@ class ProductController extends Controller
                         $outstockbtn = '
                             <form method="POST" action="'.route('products.mark-outstock', $row->id).'" style="display:inline;">
                                 '.csrf_field().'
-                                <button type="submit" class="btn btn-warning btn-sm" title="Mark as Out of Stock" onclick="return confirm(\'Mark this item as Out of Stock?\')">
+                                <button type="submit" class="btn btn-warning btn-sm" title="Mark as Out of Stock">
                                     <i class="fas fa-box-open"></i>
                                 </button>
                             </form>';
@@ -90,7 +90,7 @@ class ProductController extends Controller
                         $expiredbtn = '
                             <form method="POST" action="'.route('products.mark-expired', $row->id).'" style="display:inline;">
                                 '.csrf_field().'
-                                <button type="submit" class="btn btn-secondary btn-sm" title="Mark as Expired" onclick="return confirm(\'Mark this item as Expired?\')">
+                                <button type="submit" class="btn btn-secondary btn-sm" title="Mark as Expired">
                                     <i class="fas fa-calendar-times"></i>
                                 </button>
                             </form>';
@@ -371,8 +371,7 @@ class ProductController extends Controller
         if ($product->purchase) {
             $product->purchase->update(['quantity' => 0]);
         }
-        $notification = notify('Product marked as Out of Stock successfully.');
-        return redirect()->route('products.index')->with($notification);
+        return redirect()->route('products.index');
     }
 
     /**
@@ -385,8 +384,7 @@ class ProductController extends Controller
                 'expiry_date' => \Carbon\Carbon::yesterday()->toDateString()
             ]);
         }
-        $notification = notify('Product marked as Expired successfully.');
-        return redirect()->route('products.index')->with($notification);
+        return redirect()->route('products.index');
     }
 
     /**

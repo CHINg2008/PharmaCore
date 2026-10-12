@@ -135,42 +135,47 @@
         }); 
     });
     @if(Session::has('message'))
-        var type = "{{ Session::get('alert-type', 'info') }}";
-        switch(type){
-            case 'info':
-                Snackbar.show({
-                    text: "{{ Session::get('message') }}",
-                    actionTextColor: '#fff',
-                    backgroundColor: '#2196f3'
-                });
-                break;
+        var messageText = "{{ Session::get('message') }}";
+        var lowerMsg = messageText.toLowerCase();
+        // Suppress popup for out of stock and expired items
+        if (!lowerMsg.includes('out of stock') && !lowerMsg.includes('outstock') && !lowerMsg.includes('expired')) {
+            var type = "{{ Session::get('alert-type', 'info') }}";
+            switch(type){
+                case 'info':
+                    Snackbar.show({
+                        text: messageText,
+                        actionTextColor: '#fff',
+                        backgroundColor: '#2196f3'
+                    });
+                    break;
 
-            case 'warning':
-                Snackbar.show({
-                    text: "{{ Session::get('message') }}",
-                    pos: 'top-right',
-                    actionTextColor: '#fff',
-                    backgroundColor: '#e2a03f'
-                });
-                break;
+                case 'warning':
+                    Snackbar.show({
+                        text: messageText,
+                        pos: 'top-right',
+                        actionTextColor: '#fff',
+                        backgroundColor: '#e2a03f'
+                    });
+                    break;
 
-            case 'success':
-                Snackbar.show({
-                    text: "{{ Session::get('message') }}",
-                    pos: 'top-right',
-                    actionTextColor: '#fff',
-                    backgroundColor: '#8dbf42'
-                });
-                break;
+                case 'success':
+                    Snackbar.show({
+                        text: messageText,
+                        pos: 'top-right',
+                        actionTextColor: '#fff',
+                        backgroundColor: '#8dbf42'
+                    });
+                    break;
 
-            case 'danger':
-                Snackbar.show({
-                    text: "{{ Session::get('message') }}",
-                    pos: 'top-right',
-                    actionTextColor: '#fff',
-                    backgroundColor: '#e7515a'
-                });
-                break;
+                case 'danger':
+                    Snackbar.show({
+                        text: messageText,
+                        pos: 'top-right',
+                        actionTextColor: '#fff',
+                        backgroundColor: '#e7515a'
+                    });
+                    break;
+            }
         }
     @endif
 </script>

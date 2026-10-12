@@ -120,12 +120,9 @@ class SaleController extends Controller
             $notification = notify("Product has been sold");
         } 
         if($new_quantity <=1 && $new_quantity !=0){
-            // send notification 
+            // send notification to system notification bell
             $product = Purchase::where('quantity', '<=', 1)->first();
             event(new PurchaseOutStock($product));
-            // end of notification 
-            $notification = notify("Product is running out of stock!!!");
-            
         }
 
         return redirect()->route('sales.index')->with($notification);
@@ -192,12 +189,9 @@ class SaleController extends Controller
             $notification = notify("Product has been updated");
         } 
         if($new_quantity <=1 && $new_quantity !=0){
-            // send notification 
+            // send notification to system notification bell
             $product = Purchase::where('quantity', '<=', 1)->first();
             event(new PurchaseOutStock($product));
-            // end of notification 
-            $notification = notify("Product is running out of stock!!!");
-            
         }
         return redirect()->route('sales.index')->with($notification);
     }
