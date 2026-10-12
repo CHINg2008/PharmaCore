@@ -16,8 +16,6 @@
 		<i class="fe fe-text-align-left"></i>
 	</a>
 	
-	
-	
 	<!-- Mobile Menu Toggle -->
 	<a class="mobile_btn" id="mobile_btn">
 		<i class="fa fa-bars"></i>
@@ -31,43 +29,104 @@
 				<i class="fas fa-clipboard"></i>
 			</a>
 		</li>
-		<!-- Notifications -->
+
+		@php
+			$unreadNotifications = auth()->check() ? auth()->user()->unreadNotifications : collect([]);
+			$unreadCount = $unreadNotifications->count();
+		@endphp
+
+		<!-- Interactive Responsive Notifications Dropdown -->
 		<li class="nav-item dropdown noti-dropdown">
-			
-			<a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown">
-				<i class="fe fe-bell"></i> <span class="badge badge-pill">{{auth()->user()->unReadNotifications->count()}}</span>
+			<a href="#" class="dropdown-toggle nav-link noti-bell-container" data-toggle="dropdown" aria-expanded="false" title="Notifications">
+				<i class="fe fe-bell @if($unreadCount > 0) noti-bell-active text-warning @endif"></i>
+				@if($unreadCount > 0)
+					<span class="noti-badge-pill">{{ $unreadCount }}</span>
+				@endif
 			</a>
-			<div class="dropdown-menu notifications">
-				<div class="topnav-dropdown-header">
-					<span class="notification-title">Notifications</span>
-					<a href="{{route('mark-as-read')}}" class="clear-noti">Mark All As Read </a>
+			<div class="dropdown-menu notifications dropdown-menu-right">
+				<div class="topnav-dropdown-header d-flex justify-content-between align-items-center px-3 py-2 border-bottom">
+					<div class="d-flex align-items-center">
+						<span class="notification-title font-weight-bold text-dark mb-0">System Alerts</span>
+						@if($unreadCount > 0)
+							<span class="badge badge-pill badge-danger ml-2">{{ $unreadCount }} Unread</span>
+						@endif
+					</div>
+					@if($unreadCount > 0)
+						<a href="javascript:void(0)" onclick="markNotificationsAsRead(event)" class="clear-noti text-primary" style="font-size: 0.8rem; font-weight: 600;">
+							<i class="fe fe-check mr-1"></i>Mark Read
+						</a>
+					@endif
 				</div>
+
 				<div class="noti-content">
 					<ul class="notification-list">
-						@foreach (auth()->user()->unReadNotifications as $notification)
+						@forelse ($unreadNotifications as $notification)
+							@php
+								$notifData = $notification->data ?? [];
+								$pName = $notifData['product_name'] ?? 'Medicine';
+								$qty = $notifData['quantity'] ?? 0;
+								$alertType = $notifData['alert_type'] ?? ($qty <= 0 ? 'Out of Stock' : 'Low Stock');
+								
+								if (stripos($alertType, 'expired') !== false) {
+									$redirectTarget = 'expired';
+									$badgeColor = 'danger';
+									$icon = 'fe-alert-octagon';
+									$headline = 'Expired Product';
+									$subtext = $pName . ' has reached or passed expiration date.';
+								} elseif ($qty <= 0 || stripos($alertType, 'out') !== false) {
+									$redirectTarget = 'outstock';
+									$badgeColor = 'danger';
+									$icon = 'fe-package';
+									$headline = 'Out of Stock';
+									$subtext = $pName . ' inventory is completely depleted (0 left).';
+								} else {
+									$redirectTarget = 'purchases';
+									$badgeColor = 'warning';
+									$icon = 'fe-alert-triangle';
+									$headline = 'Low Stock Warning';
+									$subtext = $pName . ' has only ' . $qty . ' units remaining in stock.';
+								}
+							@endphp
 							<li class="notification-message">
-								<a href="{{route('read')}}">
-									<div class="media">
-										<span class="avatar avatar-sm">
-											<img class="avatar-img rounded-circle" alt="Product image" src="{{asset('storage/purchases/'.$notification['image'])}}">
+								<a href="{{ route('read', ['redirect' => $redirectTarget]) }}" class="d-flex align-items-start py-2 px-3">
+									<div class="media mr-2">
+										<span class="avatar avatar-sm bg-{{ $badgeColor }}-light text-{{ $badgeColor }} rounded-circle d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; min-width: 36px;">
+											<i class="fe {{ $icon }}"></i>
 										</span>
-										<div class="media-body">
-											<h6 class="text-danger">Stock Alert</h6>
-											<p class="noti-details">
-												<span class="noti-title">{{$notification->data['product_name']}} is only {{$notification->data['quantity']}} left.</span>
-												<span>Please update the purchase quantity </span>
-											</p>
-											
-											<p class="noti-time"><span class="notification-time">{{$notification->created_at->diffForHumans()}}</span></p>
+									</div>
+									<div class="media-body" style="font-size: 0.83rem;">
+										<div class="d-flex justify-content-between align-items-center">
+											<h6 class="text-{{ $badgeColor }} font-weight-bold mb-1" style="font-size: 0.82rem;">{{ $headline }}</h6>
+											<small class="text-muted" style="font-size: 0.7rem;">{{ $notification->created_at ? $notification->created_at->diffForHumans(null, true) : 'Active' }}</small>
 										</div>
+										<p class="noti-details text-dark mb-1" style="line-height: 1.3;">
+											{{ $subtext }}
+										</p>
+										<span class="text-primary font-weight-bold" style="font-size: 0.74rem;">
+											Resolve issue <i class="fe fe-arrow-right ml-1"></i>
+										</span>
 									</div>
 								</a>
 							</li>
-						@endforeach						
+						@empty
+							<li class="text-center py-4 px-3">
+								<div class="avatar avatar-md bg-success-light text-success mx-auto mb-2 rounded-circle d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
+									<i class="fe fe-check-circle" style="font-size: 1.4rem;"></i>
+								</div>
+								<h6 class="font-weight-bold mb-1 text-dark" style="font-size: 0.9rem;">All Caught Up!</h6>
+								<small class="text-muted">No pending inventory, expiry, or stock alerts right now.</small>
+							</li>
+						@endforelse						
 					</ul>
 				</div>
-				<div class="topnav-dropdown-footer">
-					<a href="#">View all Notifications</a>
+
+				<div class="topnav-dropdown-footer d-flex justify-content-between align-items-center px-3 py-2 bg-light border-top" style="font-size: 0.8rem;">
+					<a href="{{ route('outstock') }}" class="text-warning font-weight-bold">
+						<i class="fe fe-package mr-1"></i> Out of Stock
+					</a>
+					<a href="{{ route('expired') }}" class="text-danger font-weight-bold">
+						<i class="fe fe-alert-octagon mr-1"></i> Expired Items
+					</a>
 				</div>
 			</div>
 		</li>
@@ -106,3 +165,135 @@
 	
 </div>
 <!-- /Header -->
+
+<!-- Responsive Styling & Script for Notifications -->
+<style>
+    .noti-bell-container {
+        position: relative;
+        padding: 0 15px !important;
+        display: flex !important;
+        align-items: center;
+        height: 60px;
+    }
+
+    @keyframes bell-pulse {
+        0% { transform: rotate(0); }
+        10% { transform: rotate(16deg); }
+        20% { transform: rotate(-16deg); }
+        30% { transform: rotate(12deg); }
+        40% { transform: rotate(-12deg); }
+        50% { transform: rotate(6deg); }
+        60% { transform: rotate(-6deg); }
+        70% { transform: rotate(0); }
+        100% { transform: rotate(0); }
+    }
+
+    .noti-bell-active {
+        animation: bell-pulse 2.5s infinite ease-in-out;
+        transform-origin: top center;
+    }
+
+    .noti-badge-pill {
+        position: absolute;
+        top: 12px;
+        right: 8px;
+        background: #ef4444 !important;
+        color: #ffffff !important;
+        font-size: 0.65rem;
+        font-weight: 800;
+        min-width: 18px;
+        height: 18px;
+        line-height: 15px;
+        padding: 0 4px;
+        border-radius: 9px;
+        border: 2px solid #ffffff;
+        text-align: center;
+        box-shadow: 0 2px 6px rgba(239, 68, 68, 0.6);
+        pointer-events: none;
+    }
+
+    .dropdown-menu.notifications {
+        min-width: 350px;
+        max-width: 390px;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.18);
+        padding: 0;
+        right: 0 !important;
+        left: auto !important;
+        overflow: hidden;
+    }
+
+    @media (max-width: 576px) {
+        .dropdown-menu.notifications {
+            min-width: 300px;
+            max-width: 94vw;
+            right: -60px !important;
+        }
+    }
+
+    .notification-list {
+        max-height: 350px;
+        overflow-y: auto;
+        padding: 0;
+        margin: 0;
+        list-style: none;
+    }
+
+    .notification-message {
+        border-bottom: 1px solid #f1f5f9;
+        transition: background 0.15s ease;
+    }
+
+    .notification-message:hover {
+        background: #f8fafc;
+    }
+
+    .bg-danger-light {
+        background-color: rgba(239, 68, 68, 0.12) !important;
+    }
+
+    .bg-warning-light {
+        background-color: rgba(245, 158, 11, 0.12) !important;
+    }
+
+    .bg-success-light {
+        background-color: rgba(16, 185, 129, 0.12) !important;
+    }
+</style>
+
+<script>
+    function markNotificationsAsRead(e) {
+        if(e) e.preventDefault();
+        fetch("{{ route('mark-as-read') }}", {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(res => res.json())
+        .then(data => {
+            const badge = document.querySelector('.noti-badge-pill');
+            if (badge) badge.style.display = 'none';
+            const bell = document.querySelector('.noti-bell-container i');
+            if (bell) {
+                bell.classList.remove('noti-bell-active', 'text-warning');
+            }
+            const clearBtn = document.querySelector('.clear-noti');
+            if (clearBtn) clearBtn.style.display = 'none';
+            const badgeUnread = document.querySelector('.notification-title + .badge');
+            if (badgeUnread) badgeUnread.style.display = 'none';
+            const list = document.querySelector('.noti-content');
+            if (list) {
+                list.innerHTML = `
+                    <div class="text-center py-4 px-3">
+                        <div class="avatar avatar-md bg-success-light text-success mx-auto mb-2 rounded-circle d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
+                            <i class="fe fe-check-circle" style="font-size: 1.4rem;"></i>
+                        </div>
+                        <h6 class="font-weight-bold mb-1 text-dark" style="font-size: 0.9rem;">All Caught Up!</h6>
+                        <small class="text-muted">Notifications cleared successfully.</small>
+                    </div>`;
+            }
+        })
+        .catch(err => {
+            window.location.href = "{{ route('mark-as-read') }}";
+        });
+    }
+</script>
