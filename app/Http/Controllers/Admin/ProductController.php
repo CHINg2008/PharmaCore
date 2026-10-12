@@ -96,13 +96,15 @@ class ProductController extends Controller
                             </form>';
                     }
 
+                    $restockbtn = '<button type="button" class="btn btn-success btn-sm restock-trigger-btn" data-id="'.$row->id.'" data-name="'.htmlspecialchars($row->purchase->product ?? 'Medicine').'" data-qty="'.($row->purchase->quantity ?? 0).'" data-cost="'.($row->purchase->cost_price ?? 0).'" data-supplier="'.htmlspecialchars($row->purchase->supplier->company ?? 'N/A').'" data-expiry="'.($row->purchase->expiry_date ?? '').'" data-route="'.route('products.restock', $row->id).'" title="Restock / Buy Inventory"><i class="fas fa-truck-loading"></i></button>';
+
                     if (!auth()->user()->hasPermissionTo('edit-product')) {
                         $editbtn = '';
                     }
                     if (!auth()->user()->hasPermissionTo('destroy-purchase')) {
                         $deletebtn = '';
                     }
-                    return $editbtn.' '.$outstockbtn.' '.$expiredbtn.' '.$deletebtn;
+                    return $editbtn.' '.$restockbtn.' '.$outstockbtn.' '.$expiredbtn.' '.$deletebtn;
                 })
                 ->rawColumns(['product','action','expiry_date','manufacturing_date'])
                 ->make(true);
@@ -327,11 +329,12 @@ class ProductController extends Controller
                     }
                 })
                 ->addColumn('action', function ($row) {
-                    $editbtn = '<a href="'.route("products.edit", $row->id).'" class="editbtn"><button class="btn btn-primary" title="Edit / Restock"><i class="fas fa-edit"></i> Edit</button></a>';
+                    $restockbtn = '<button type="button" class="btn btn-success btn-sm restock-trigger-btn" data-id="'.$row->id.'" data-name="'.htmlspecialchars($row->purchase->product ?? 'Medicine').'" data-qty="'.($row->purchase->quantity ?? 0).'" data-cost="'.($row->purchase->cost_price ?? 0).'" data-supplier="'.htmlspecialchars($row->purchase->supplier->company ?? 'N/A').'" data-expiry="'.($row->purchase->expiry_date ?? '').'" data-route="'.route('products.restock', $row->id).'" title="Restock / Buy Inventory"><i class="fas fa-truck-loading mr-1"></i> Restock</button>';
+                    $editbtn = '<a href="'.route("products.edit", $row->id).'" class="editbtn ml-1"><button class="btn btn-primary btn-sm" title="Edit"><i class="fas fa-edit"></i> Edit</button></a>';
                     if (!auth()->user()->hasPermissionTo('edit-product')) {
                         $editbtn = '';
                     }
-                    return $editbtn;
+                    return $restockbtn.' '.$editbtn;
                 })
                 ->rawColumns(['product','action'])
                 ->make(true);
@@ -379,5 +382,36 @@ class ProductController extends Controller
         }
         $notification = notify('Product marked as Expired successfully.');
         return redirect()->route('products.index')->with($notification);
+    }
+
+    /**
+     * Restock a product by purchasing additional units.
+     */
+    public function restock(Request $request, Product $product)
+    {
+        $request->validate([
+            'quantity' => 'required|integer|min:1',
+            'cost_price' => 'nullable|numeric|min:0',
+            'expiry_date' => 'nullable|date',
+        ]);
+
+        if ($product->purchase) {
+            $product->purchase->increment('quantity', $request->quantity);
+
+            $updates = [];
+            if ($request->filled('cost_price')) {
+                $updates['cost_price'] = $request->cost_price;
+            }
+            if ($request->filled('expiry_date')) {
+                $updates['expiry_date'] = $request->expiry_date;
+            }
+            if (!empty($updates)) {
+                $product->purchase->update($updates);
+            }
+        }
+
+        $prodName = $product->purchase->product ?? 'Medicine';
+        $notification = notify("Product '{$prodName}' has been successfully restocked by {$request->quantity} units!");
+        return back()->with($notification);
     }
 }

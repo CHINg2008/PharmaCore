@@ -55,6 +55,7 @@ Route::middleware(['auth'])->prefix('admin')->group(function(){
     Route::get('products/expired',[ProductController::class,'expired'])->name('expired');
     Route::post('products/{product}/mark-outstock',[ProductController::class,'markOutStock'])->name('products.mark-outstock');
     Route::post('products/{product}/mark-expired',[ProductController::class,'markExpired'])->name('products.mark-expired');
+    Route::post('products/{product}/restock',[ProductController::class,'restock'])->name('products.restock');
     Route::resource('sales',SaleController::class)->except('show');
     Route::get('sales/reports',[SaleController::class,'reports'])->name('sales.report');
     Route::post('sales/reports',[SaleController::class,'generateReport']);
