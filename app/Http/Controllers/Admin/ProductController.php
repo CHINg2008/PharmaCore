@@ -96,7 +96,12 @@ class ProductController extends Controller
                             </form>';
                     }
 
-                    $restockbtn = '<button type="button" class="btn btn-success btn-sm restock-trigger-btn" data-id="'.$row->id.'" data-name="'.htmlspecialchars($row->purchase->product ?? 'Medicine').'" data-qty="'.($row->purchase->quantity ?? 0).'" data-cost="'.($row->purchase->cost_price ?? 0).'" data-supplier="'.htmlspecialchars($row->purchase->supplier->company ?? 'N/A').'" data-expiry="'.($row->purchase->expiry_date ?? '').'" data-route="'.route('products.restock', $row->id).'" title="Restock / Buy Inventory"><i class="fas fa-truck-loading"></i></button>';
+                    $restockbtn = '';
+                    if ($qty < 50) {
+                        $restockbtn = '<button type="button" class="btn btn-success btn-sm restock-trigger-btn" data-id="'.$row->id.'" data-name="'.htmlspecialchars($row->purchase->product ?? 'Medicine').'" data-qty="'.$qty.'" data-cost="'.($row->purchase->cost_price ?? 0).'" data-supplier="'.htmlspecialchars($row->purchase->supplier->company ?? 'N/A').'" data-expiry="'.($row->purchase->expiry_date ?? '').'" data-route="'.route('products.restock', $row->id).'" title="Restock / Buy Inventory (Stock: '.$qty.' < 50)"><i class="fas fa-truck-loading"></i></button>';
+                    } else {
+                        $restockbtn = '<button type="button" class="btn btn-secondary btn-sm" disabled style="opacity: 0.45; cursor: not-allowed;" title="Stock sufficient ('.$qty.' >= 50 units). Restock only allowed when quantity is less than 50."><i class="fas fa-truck-loading"></i></button>';
+                    }
 
                     if (!auth()->user()->hasPermissionTo('edit-product')) {
                         $editbtn = '';
@@ -394,6 +399,11 @@ class ProductController extends Controller
             'cost_price' => 'nullable|numeric|min:0',
             'expiry_date' => 'nullable|date',
         ]);
+
+        if ($product->purchase && $product->purchase->quantity >= 50) {
+            $notification = notify("Restock not permitted: '{$product->purchase->product}' currently has {$product->purchase->quantity} units in stock. Restocking is only allowed when quantity is less than 50.", 'danger');
+            return back()->with($notification);
+        }
 
         if ($product->purchase) {
             $product->purchase->increment('quantity', $request->quantity);

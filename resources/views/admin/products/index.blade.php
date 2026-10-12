@@ -136,6 +136,12 @@
 
         // Restock modal trigger handler
         $(document).on('click', '.restock-trigger-btn', function() {
+            var qty = parseInt($(this).data('qty') || 0);
+            if (qty >= 50) {
+                alert("Restock is only permitted when quantity is less than 50. This product currently has " + qty + " units in stock.");
+                return false;
+            }
+
             var route = $(this).data('route');
             var name = $(this).data('name');
             var qty = $(this).data('qty');
