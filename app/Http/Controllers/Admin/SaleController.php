@@ -92,33 +92,35 @@ class SaleController extends Controller
             'product'=>'required',
             'quantity'=>'required|integer|min:1'
         ]);
-        $sold_product = Product::find($request->product);
-        
-        /**update quantity of
-            sold item from
-         purchases
+        $sold_product = Product::with('purchase')->findOrFail($request->product);
+        $purchased_item = $sold_product->purchase;
+        $availableStock = $purchased_item ? $purchased_item->quantity : 0;
+        $prodName = $purchased_item ? $purchased_item->product : 'Medicine';
+
+        // Check if sales item quantity is more than the in-stock quantity
+        if ($request->quantity > $availableStock) {
+            $notification = notify("Cannot complete sale: Requested quantity ({$request->quantity}) exceeds the available in-stock quantity ({$availableStock}) for '{$prodName}'!", 'danger');
+            return back()->withInput()->with($notification);
+        }
+
+        $new_quantity = $availableStock - $request->quantity;
+
+        $purchased_item->update([
+            'quantity'=>$new_quantity,
+        ]);
+
+        /**
+         * calculating item's total price
         **/
-        $purchased_item = Purchase::find($sold_product->purchase->id);
-        $new_quantity = ($purchased_item->quantity) - ($request->quantity);
-        $notification = '';
-        if (!($new_quantity < 0)){
+        $total_price = ($request->quantity) * ($sold_product->price);
+        Sale::create([
+            'product_id'=>$request->product,
+            'quantity'=>$request->quantity,
+            'total_price'=>$total_price,
+        ]);
 
-            $purchased_item->update([
-                'quantity'=>$new_quantity,
-            ]);
+        $notification = notify("Product '{$prodName}' has been sold successfully!");
 
-            /**
-             * calcualting item's total price
-            **/
-            $total_price = ($request->quantity) * ($sold_product->price);
-            Sale::create([
-                'product_id'=>$request->product,
-                'quantity'=>$request->quantity,
-                'total_price'=>$total_price,
-            ]);
-
-            $notification = notify("Product has been sold");
-        } 
         if($new_quantity <=1 && $new_quantity !=0){
             // send notification to system notification bell
             $product = Purchase::where('quantity', '<=', 1)->first();
@@ -158,36 +160,43 @@ class SaleController extends Controller
             'product'=>'required',
             'quantity'=>'required|integer|min:1'
         ]);
-        $sold_product = Product::find($request->product);
-        /**
-         * update quantity of sold item from purchases
-        **/
-        $purchased_item = Purchase::find($sold_product->purchase->id);
-        if(!empty($request->quantity)){
-            $new_quantity = ($purchased_item->quantity) - ($request->quantity);
+        $sold_product = Product::with('purchase')->findOrFail($request->product);
+        $purchased_item = $sold_product->purchase;
+        $prodName = $purchased_item ? $purchased_item->product : 'Medicine';
+
+        // Calculate available stock including previously sold units if same product
+        $currentStock = $purchased_item ? $purchased_item->quantity : 0;
+        $availableStock = $currentStock;
+        if ($sale->product_id == $sold_product->id) {
+            $availableStock += $sale->quantity;
         }
-        $new_quantity = $sale->quantity;
-        $notification = '';
-        if (!($new_quantity < 0)){
-            $purchased_item->update([
-                'quantity'=>$new_quantity,
-            ]);
 
-            /**
-             * calcualting item's total price
-            **/
-            if(!empty($request->quantity)){
-                $total_price = ($request->quantity) * ($sold_product->price);
-            }
-            $total_price = $sale->total_price;
-            $sale->update([
-                'product_id'=>$request->product,
-                'quantity'=>$request->quantity,
-                'total_price'=>$total_price,
-            ]);
+        // Check if sales item quantity is more than the in-stock quantity
+        if ($request->quantity > $availableStock) {
+            $notification = notify("Cannot update sale: Requested quantity ({$request->quantity}) exceeds the available in-stock quantity ({$availableStock}) for '{$prodName}'!", 'danger');
+            return back()->withInput()->with($notification);
+        }
 
-            $notification = notify("Product has been updated");
-        } 
+        // If product changed, return stock to old product and deduct from new product
+        if ($sale->product_id != $sold_product->id && $sale->product && $sale->product->purchase) {
+            $sale->product->purchase->increment('quantity', $sale->quantity);
+            $new_quantity = $currentStock - $request->quantity;
+            $purchased_item->update(['quantity' => $new_quantity]);
+        } else {
+            $diff = $request->quantity - $sale->quantity;
+            $new_quantity = $currentStock - $diff;
+            $purchased_item->update(['quantity' => $new_quantity]);
+        }
+
+        $total_price = ($request->quantity) * ($sold_product->price);
+        $sale->update([
+            'product_id'=>$request->product,
+            'quantity'=>$request->quantity,
+            'total_price'=>$total_price,
+        ]);
+
+        $notification = notify("Sale for '{$prodName}' has been updated successfully!");
+
         if($new_quantity <=1 && $new_quantity !=0){
             // send notification to system notification bell
             $product = Purchase::where('quantity', '<=', 1)->first();

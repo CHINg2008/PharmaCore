@@ -172,8 +172,19 @@
                         text: messageText,
                         pos: 'top-right',
                         actionTextColor: '#fff',
-                        backgroundColor: '#e7515a'
+                        backgroundColor: '#e7515a',
+                        duration: 5000
                     });
+                    if (lowerMsg.includes('exceed') || lowerMsg.includes('stock') || lowerMsg.includes('quantity')) {
+                        Swal.fire({
+                            title: "Insufficient Stock Warning!",
+                            text: messageText,
+                            type: "warning",
+                            confirmButtonText: '<i class="fe fe-check mr-1"></i> Understood',
+                            confirmButtonClass: "btn btn-danger mt-2",
+                            buttonsStyling: false
+                        });
+                    }
                     break;
             }
         }
