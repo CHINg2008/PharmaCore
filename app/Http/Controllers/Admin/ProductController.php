@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Models\Product;
 use App\Models\Purchase;
+use App\Events\PurchaseOutStock;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Yajra\DataTables\DataTables;
@@ -370,6 +371,7 @@ class ProductController extends Controller
     {
         if ($product->purchase) {
             $product->purchase->update(['quantity' => 0]);
+            event(new PurchaseOutStock($product->purchase));
         }
         return redirect()->route('products.index');
     }
@@ -383,6 +385,7 @@ class ProductController extends Controller
             $product->purchase->update([
                 'expiry_date' => \Carbon\Carbon::yesterday()->toDateString()
             ]);
+            event(new PurchaseOutStock($product->purchase));
         }
         return redirect()->route('products.index');
     }

@@ -121,10 +121,9 @@ class SaleController extends Controller
 
         $notification = notify("Product '{$prodName}' has been sold successfully!");
 
-        if($new_quantity <=1 && $new_quantity !=0){
-            // send notification to system notification bell
-            $product = Purchase::where('quantity', '<=', 1)->first();
-            event(new PurchaseOutStock($product));
+        if ($new_quantity < 50) {
+            // send notification to system notification bell for out-of-stock or low-stock
+            event(new PurchaseOutStock($purchased_item));
         }
 
         return redirect()->route('sales.index')->with($notification);
@@ -197,10 +196,9 @@ class SaleController extends Controller
 
         $notification = notify("Sale for '{$prodName}' has been updated successfully!");
 
-        if($new_quantity <=1 && $new_quantity !=0){
-            // send notification to system notification bell
-            $product = Purchase::where('quantity', '<=', 1)->first();
-            event(new PurchaseOutStock($product));
+        if ($new_quantity < 50) {
+            // send notification to system notification bell for out-of-stock or low-stock
+            event(new PurchaseOutStock($purchased_item));
         }
         return redirect()->route('sales.index')->with($notification);
     }

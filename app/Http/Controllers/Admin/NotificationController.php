@@ -24,7 +24,11 @@ class NotificationController extends Controller
     public function read(Request $request)
     {
         if (auth()->check()) {
-            auth()->user()->unreadNotifications->markAsRead();
+            if ($request->filled('id')) {
+                auth()->user()->notifications()->where('id', $request->query('id'))->update(['read_at' => now()]);
+            } else {
+                auth()->user()->unreadNotifications->markAsRead();
+            }
         }
 
         $redirect = $request->query('redirect');

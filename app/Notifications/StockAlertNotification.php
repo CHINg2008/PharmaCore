@@ -32,25 +32,7 @@ class StockAlertNotification extends Notification
      */
     public function via($notifiable)
     {
-        return ['mail','database','broadcast'];
-    }
-
-    /**
-     * Get the mail representation of the notification.
-     *
-     * @param  mixed  $notifiable
-     * @return \Illuminate\Notifications\Messages\MailMessage
-     */
-    public function toMail($notifiable)
-    {
-        $url = url(route('purchases.edit',$this->data->id));
-        return (new MailMessage)
-                    ->greeting('Hello!')
-                    ->line('The Product below is running out of stock.')
-                    ->line("Product's name is ".$this->data->product ." is only ".$this->data->quantity." left in quantity")
-                    ->line("Please update the product's quantity or make a new purchase.")
-                    ->action('View Product', $url)
-                    ->line('Thank you!');
+        return ['database'];
     }
 
     /**
@@ -61,10 +43,39 @@ class StockAlertNotification extends Notification
      */
     public function toArray($notifiable)
     {
+        if (is_array($this->data)) {
+            $productName = $this->data['product_name'] ?? $this->data['product'] ?? 'Medicine';
+            $quantity = $this->data['quantity'] ?? 0;
+            $expiryDate = $this->data['expiry_date'] ?? null;
+            $purchaseId = $this->data['purchase_id'] ?? $this->data['id'] ?? null;
+            $image = $this->data['image'] ?? 'default.png';
+            $alertType = $this->data['alert_type'] ?? null;
+        } else {
+            $productName = $this->data->product ?? 'Medicine';
+            $quantity = $this->data->quantity ?? 0;
+            $expiryDate = $this->data->expiry_date ?? null;
+            $purchaseId = $this->data->id ?? null;
+            $image = $this->data->image ?? 'default.png';
+            $alertType = $this->data->alert_type ?? null;
+        }
+
+        if (!$alertType) {
+            if ($expiryDate && \Carbon\Carbon::parse($expiryDate)->isPast()) {
+                $alertType = 'Expired Product';
+            } elseif ($quantity <= 0) {
+                $alertType = 'Out of Stock';
+            } else {
+                $alertType = 'Low Stock Warning';
+            }
+        }
+
         return [
-            'product_name'=>$this->data->product,
-            'quantity'=>$this->data->quantity,
-            'image'=>$this->data->image,
+            'product_name' => $productName,
+            'quantity'     => $quantity,
+            'expiry_date'  => $expiryDate,
+            'purchase_id'  => $purchaseId,
+            'alert_type'   => $alertType,
+            'image'        => $image,
         ];
     }
 

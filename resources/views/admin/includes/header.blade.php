@@ -31,8 +31,14 @@
 		</li>
 
 		@php
+			if (function_exists('syncInventoryAlertNotifications')) {
+				syncInventoryAlertNotifications();
+			}
 			$unreadNotifications = auth()->check() ? auth()->user()->unreadNotifications : collect([]);
 			$unreadCount = $unreadNotifications->count();
+			$displayNotifications = $unreadCount > 0 
+				? $unreadNotifications 
+				: (auth()->check() ? auth()->user()->notifications()->take(10)->get() : collect([]));
 		@endphp
 
 		<!-- Interactive Responsive Notifications Dropdown -->
@@ -48,7 +54,9 @@
 					<div class="d-flex align-items-center">
 						<span class="notification-title font-weight-bold text-dark mb-0">System Alerts</span>
 						@if($unreadCount > 0)
-							<span class="badge badge-pill badge-danger ml-2">{{ $unreadCount }} Unread</span>
+							<span class="badge badge-pill badge-danger ml-2 noti-unread-counter">{{ $unreadCount }} Unread</span>
+						@elseif($displayNotifications->count() > 0)
+							<span class="badge badge-pill badge-secondary ml-2 noti-unread-counter">Recent Alerts</span>
 						@endif
 					</div>
 					@if($unreadCount > 0)
@@ -60,12 +68,13 @@
 
 				<div class="noti-content">
 					<ul class="notification-list">
-						@forelse ($unreadNotifications as $notification)
+						@forelse ($displayNotifications as $notification)
 							@php
-								$notifData = $notification->data ?? [];
+								$notifData = is_array($notification->data) ? $notification->data : (json_decode($notification->data, true) ?? []);
 								$pName = $notifData['product_name'] ?? 'Medicine';
 								$qty = $notifData['quantity'] ?? 0;
 								$alertType = $notifData['alert_type'] ?? ($qty <= 0 ? 'Out of Stock' : 'Low Stock');
+								$isRead = !is_null($notification->read_at);
 								
 								if (stripos($alertType, 'expired') !== false) {
 									$redirectTarget = 'expired';
@@ -87,8 +96,8 @@
 									$subtext = $pName . ' has only ' . $qty . ' units remaining in stock.';
 								}
 							@endphp
-							<li class="notification-message">
-								<a href="{{ route('read', ['redirect' => $redirectTarget]) }}" class="d-flex align-items-start py-2 px-3">
+							<li class="notification-message @if($isRead) opacity-75 @endif">
+								<a href="{{ route('read', ['id' => $notification->id, 'redirect' => $redirectTarget]) }}" class="d-flex align-items-start py-2 px-3">
 									<div class="media mr-2">
 										<span class="avatar avatar-sm bg-{{ $badgeColor }}-light text-{{ $badgeColor }} rounded-circle d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; min-width: 36px;">
 											<i class="fe {{ $icon }}"></i>
@@ -97,7 +106,14 @@
 									<div class="media-body" style="font-size: 0.83rem;">
 										<div class="d-flex justify-content-between align-items-center">
 											<h6 class="text-{{ $badgeColor }} font-weight-bold mb-1" style="font-size: 0.82rem;">{{ $headline }}</h6>
-											<small class="text-muted" style="font-size: 0.7rem;">{{ $notification->created_at ? $notification->created_at->diffForHumans(null, true) : 'Active' }}</small>
+											<div class="d-flex align-items-center">
+												@if(!$isRead)
+													<span class="badge badge-pill badge-danger mr-1 noti-new-pill" style="font-size: 0.6rem; padding: 2px 5px;">New</span>
+												@else
+													<span class="badge badge-pill badge-light border text-muted mr-1" style="font-size: 0.6rem; padding: 2px 5px;">Read</span>
+												@endif
+												<small class="text-muted" style="font-size: 0.7rem;">{{ $notification->created_at ? $notification->created_at->diffForHumans(null, true) : 'Active' }}</small>
+											</div>
 										</div>
 										<p class="noti-details text-dark mb-1" style="line-height: 1.3;">
 											{{ $subtext }}
@@ -278,19 +294,17 @@
             }
             const clearBtn = document.querySelector('.clear-noti');
             if (clearBtn) clearBtn.style.display = 'none';
-            const badgeUnread = document.querySelector('.notification-title + .badge');
-            if (badgeUnread) badgeUnread.style.display = 'none';
-            const list = document.querySelector('.noti-content');
-            if (list) {
-                list.innerHTML = `
-                    <div class="text-center py-4 px-3">
-                        <div class="avatar avatar-md bg-success-light text-success mx-auto mb-2 rounded-circle d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
-                            <i class="fe fe-check-circle" style="font-size: 1.4rem;"></i>
-                        </div>
-                        <h6 class="font-weight-bold mb-1 text-dark" style="font-size: 0.9rem;">All Caught Up!</h6>
-                        <small class="text-muted">Notifications cleared successfully.</small>
-                    </div>`;
+            const counterBadge = document.querySelector('.noti-unread-counter');
+            if (counterBadge) {
+                counterBadge.textContent = 'Recent Alerts';
+                counterBadge.className = 'badge badge-pill badge-secondary ml-2 noti-unread-counter';
             }
+            document.querySelectorAll('.noti-new-pill').forEach(el => {
+                el.outerHTML = '<span class="badge badge-pill badge-light border text-muted mr-1" style="font-size: 0.6rem; padding: 2px 5px;">Read</span>';
+            });
+            document.querySelectorAll('.notification-message').forEach(el => {
+                el.classList.add('opacity-75');
+            });
         })
         .catch(err => {
             window.location.href = "{{ route('mark-as-read') }}";
